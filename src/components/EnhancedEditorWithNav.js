@@ -2,6 +2,11 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import MonacoEditor from 'react-monaco-editor';
 import ReactResizeDetector from 'react-resize-detector';
+import FileDownload from 'react-file-download';
+import Delve from 'dlv';
+import PapaParse from 'papaparse';
+import _ from 'lodash';
+
 import registerJsonataLanguage from './monacoIntegration/jsonata';
 import EditorNav from './EditorNav';
 
@@ -16,6 +21,8 @@ export default class EnhancedEditorWithNav extends Component {
     this.monaco = null;
     this.editorDidMount = this.editorDidMount.bind(this);
     this._onFormatClick = this._onFormatClick.bind(this);
+    this._onDownloadClick = this._onDownloadClick.bind(this);
+    this._onDownloadCSVClick = this._onDownloadCSVClick.bind(this);
   }
 
   getModel() {
@@ -115,6 +122,46 @@ export default class EnhancedEditorWithNav extends Component {
     }
   }
 
+  _onDownloadClick(eventKey, event) {
+    if (this.props.downloadEnabled) {
+      const filename = `${Delve(this, 'props.label', 'filename')}.${Delve(
+        this,
+        'props.language',
+        'json'
+      )}`;
+      const model = this.getModel();
+      const data = model.getValue();
+      FileDownload(data, filename.toLowerCase(), 'text/plain');
+    }
+  }
+
+  _onDownloadCSVClick(eventKey, event) {
+    if (this.props.downloadCSVEnabled) {
+      const lang = Delve(this, 'props.language', null);
+      const filename = `${Delve(this, 'props.label', 'filename')}.csv`;
+
+      if (lang.toLowerCase() === 'json') {
+        const papaparseConfig = {
+          quotes: true,
+          quoteChar: '"',
+          escapeChar: '"',
+          delimiter: ',',
+          header: true,
+          newline: '\r\n',
+        };
+
+        const model = this.getModel();
+        const data = model.getValue();
+        try {
+          const csv = PapaParse.unparse(data, papaparseConfig);
+          if (!_.isEmpty(csv)) {
+            FileDownload(csv, filename.toLowerCase(), 'text/plain');
+          }
+        } catch (error) {}
+      }
+    }
+  }
+
   /**
    * Add an error decoration based on extracting position from
    * err, supports json and jsonata
@@ -187,12 +234,12 @@ export default class EnhancedEditorWithNav extends Component {
       readOnly,
       value,
       formatEnabled,
+      downloadEnabled,
+      downloadCSVEnabled,
       label,
       options = {},
       editorDidMount,
       className,
-      moreinfo,
-      moreinfolabel,
       ...other
     } = this.props;
 
@@ -209,9 +256,11 @@ export default class EnhancedEditorWithNav extends Component {
             key={`nav-${label}`}
             label={label}
             formatEnabled={formatEnabled}
+            downloadEnabled={downloadEnabled}
+            downloadCSVEnabled={downloadCSVEnabled}
             onFormatClick={this._onFormatClick}
-            moreinfo={moreinfo}
-            moreinfolabel={moreinfolabel}
+            onDownloadClick={this._onDownloadClick}
+            onDownloadCSVClick={this._onDownloadCSVClick}
           />
           <MonacoEditor
             key={`editor-${label}`}
@@ -238,11 +287,15 @@ EnhancedEditorWithNav.propTypes = {
   value: PropTypes.string,
   width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   formatEnabled: PropTypes.bool,
+  downloadEnabled: PropTypes.bool,
+  downloadCSVEnabled: PropTypes.bool,
   label: PropTypes.string,
 };
 
 EnhancedEditorWithNav.defaultProps = {
   className: 'enhanced-editor',
   formatEnabled: true,
+  downloadEnabled: true,
+  downloadCSVEnabled: false,
   label: 'Editor',
 };

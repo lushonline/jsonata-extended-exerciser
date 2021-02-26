@@ -327,6 +327,7 @@ class ExerciserBootstrap extends React.Component {
                   options={resultsoptions}
                   editorDidMount={this.resultsEditorDidMount.bind(this)}
                   label="Results"
+                  downloadCSVEnabled={true}
                 />
               </Tab>
             </Tabs>
