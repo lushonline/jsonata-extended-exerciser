@@ -2,137 +2,132 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
-import Tooltip from 'react-bootstrap/Tooltip';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Popover from 'react-bootstrap/Popover';
+
+import { v4 as uuidv4 } from 'uuid';
+
+import MenuNavLink from './MenuNavLink';
 
 export default class EditorNav extends Component {
   constructor(props) {
     super(props);
-    this.onFormatClick = this.onFormatClick.bind(this);
-    this.onDownloadClick = this.onDownloadClick.bind(this);
-    this.onDownloadCSVClick = this.onDownloadCSVClick.bind(this);
+
+    this.state = {
+      navlinkContent: this.props.navLinks
+        .filter((link) => {
+          return link.enabled;
+        })
+        .map((link, index) => (
+          <MenuNavLink
+            id={this.props.id + '-navlink-' + index}
+            key={this.props.id + '-navlink-' + index}
+            enabled={link.enabled}
+            tooltip={link.tooltip}
+            label={link.label}
+            onClick={link.onClick}
+          ></MenuNavLink>
+        )),
+    };
   }
 
-  onFormatClick(eventKey, event) {
-    if (this.props.formatEnabled && this.props.onFormatClick) {
-      this.props.onFormatClick(eventKey, event);
-    }
+  renderPopOver(props) {
+    return (
+      <Popover id={props.id + '-nav-popover-999'}>
+        <Popover.Body>{props.info}</Popover.Body>
+      </Popover>
+    );
   }
 
-  onDownloadClick(eventKey, event) {
-    if (this.props.downloadEnabled && this.props.onDownloadClick) {
-      this.props.onDownloadClick(eventKey, event);
-    }
-  }
-
-  onDownloadCSVClick(eventKey, event) {
-    if (this.props.downloadCSVEnabled && this.props.onDownloadCSVClick) {
-      this.props.onDownloadCSVClick(eventKey, event);
-    }
-  }
-
-  render() {
-    const {
-      label,
-      formatEnabled,
-      formatLabel,
-      formatTooltip,
-      downloadEnabled,
-      downloadLabel,
-      downloadTooltip,
-      downloadCSVEnabled,
-      downloadCSVLabel,
-      downloadCSVTooltip,
-      className,
-    } = this.props;
-
-    let formatlink;
-    if (formatEnabled) {
-      formatlink = (
-        <OverlayTrigger
-          placement="bottom"
-          overlay={<Tooltip id={`tooltip-format`}>{formatTooltip}</Tooltip>}
-        >
-          <Nav>
-            <Nav.Link onClick={this.onFormatClick}>{formatLabel}</Nav.Link>
-          </Nav>
-        </OverlayTrigger>
-      );
-    }
-
-    let downloadlink;
-    if (downloadEnabled) {
-      downloadlink = (
-        <OverlayTrigger
-          placement="bottom"
-          overlay={<Tooltip id={`tooltip-download`}>{downloadTooltip}</Tooltip>}
-        >
-          <Nav>
-            <Nav.Link onClick={this.onDownloadClick}>{downloadLabel}</Nav.Link>
-          </Nav>
-        </OverlayTrigger>
-      );
-    }
-
-    let downloadCSVlink;
-    if (downloadCSVEnabled) {
-      downloadCSVlink = (
-        <OverlayTrigger
-          placement="bottom"
-          overlay={<Tooltip id={`tooltip-downloadCSV`}>{downloadCSVTooltip}</Tooltip>}
-        >
-          <Nav>
-            <Nav.Link onClick={this.onDownloadCSVClick}>{downloadCSVLabel}</Nav.Link>
-          </Nav>
-        </OverlayTrigger>
-      );
+  renderInfoHover(props) {
+    if (!props.info) {
+      return <Nav className="me-auto"></Nav>;
     }
 
     return (
-      <div className={className}>
-        <Navbar className="py-0 mt-0" bg="light" variant="light">
-          <Nav className="mr-auto">
-            <Navbar.Text className="">{<strong>{label}</strong>}</Navbar.Text>
-          </Nav>
-          {formatlink}
-          {downloadlink}
-          {downloadCSVlink}
-        </Navbar>
-      </div>
+      <OverlayTrigger
+        placement="bottom"
+        delay={{ show: 250, hide: 400 }}
+        overlay={this.renderPopOver(props)}
+      >
+        <Nav key={props.id + '-nav-info-999'} className="me-auto">
+          <Navbar.Text>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              className="bi bi-info-circle"
+              viewBox="0 0 16 16"
+            >
+              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+              <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
+            </svg>
+          </Navbar.Text>
+        </Nav>
+      </OverlayTrigger>
+    );
+  }
+
+  render() {
+    const { label, className, id } = this.props;
+
+    return (
+      <Navbar
+        key={id + '-navbar'}
+        collapseOnSelect
+        expand="lg"
+        bg="light"
+        variant="light"
+        className={className}
+      >
+        <Navbar.Brand className="ms-2" href="#">
+          {<strong>{label}</strong>}
+        </Navbar.Brand>{' '}
+        <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+        <Navbar.Collapse id="responsive-navbar-nav">
+          {this.renderInfoHover(this.props)}
+          <Nav className="justify-content-end">{this.state.navlinkContent}</Nav>
+        </Navbar.Collapse>
+      </Navbar>
     );
   }
 }
 
 EditorNav.propTypes = {
   label: PropTypes.string,
-  formatEnabled: PropTypes.bool,
-  formatLabel: PropTypes.string,
-  formatTooltip: PropTypes.string,
-  onFormatClick: PropTypes.func,
-  downloadEnabled: PropTypes.bool,
-  downloadLabel: PropTypes.string,
-  downloadTooltip: PropTypes.string,
-  onDownloadClick: PropTypes.func,
-  downloadCSVEnabled: PropTypes.bool,
-  downloadCSVLabel: PropTypes.string,
-  downloadCSVTooltip: PropTypes.string,
-  onDownloadCSVClick: PropTypes.func,
+  info: PropTypes.string,
   className: PropTypes.string,
+  id: PropTypes.string,
+
+  // An array of a certain type
+  navLinks: PropTypes.arrayOf(
+    PropTypes.shape({
+      label: PropTypes.string.isRequired,
+      tooltip: PropTypes.string,
+      onClick: PropTypes.func,
+    })
+  ),
 };
 
 EditorNav.defaultProps = {
   label: 'Header',
-  formatEnabled: true,
-  formatLabel: 'Format',
-  formatTooltip: 'Format the editor contents',
-  onFormatClick: function () {},
-  downloadEnabled: true,
-  downloadLabel: 'Download',
-  downloadTooltip: 'Download the editor contents',
-  onDownloadClick: function () {},
-  downloadCSVEnabled: false,
-  downloadCSVLabel: 'Download CSV',
-  downloadCSVTooltip: 'Download the editor contents as CSV (UTF-8)',
-  onDownloadCSVClick: function () {},
+  info: null,
   className: 'editor-nav',
+  id: uuidv4(),
+  navLinks: [
+    { enabled: true, label: 'Format', tooltip: 'Format the editor contents', onClick: () => {} },
+    {
+      enabled: true,
+      label: 'Download',
+      tooltip: 'Download the editor contents',
+      onClick: () => {},
+    },
+    {
+      enabled: true,
+      label: 'Download CSV',
+      tooltip: 'Download the editor contents as CSV (UTF-8)',
+      onClick: () => {},
+    },
+  ],
 };

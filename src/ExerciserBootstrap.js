@@ -1,28 +1,29 @@
-/**
- * © Copyright IBM Corp. 2016, 2020 All Rights Reserved
- *   Project name: JSONata
- *   This project is licensed under the MIT License, see LICENSE
- *
- * Enhanced by Martin Holden
- */
-
 import React from 'react';
-import sampledata from './data/sampledata';
-import transforms from './data/transforms';
 import _ from 'lodash';
-import EnhancedMonacoEditorWithNav from './components/EnhancedEditorWithNav';
-import MainNav from './components/MainNav';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Tabs from 'react-bootstrap/Tabs';
 import Tab from 'react-bootstrap/Tab';
+
+import JSONEditorWithNav from './components/JSONEditorWithNav';
+import JSONATAEditorWithNav from './components/JSONATAEditorWithNav';
+
+import MainNav from './components/MainNav';
 import './exerciserbootstrap.css';
-import { version } from '../package.json';
+
+import packageJson from '../package.json';
+
+import sampledata from './data/sampledata';
+import transforms from './data/transforms';
+
+const version = packageJson.version;
 
 class ExerciserBootstrap extends React.Component {
   constructor(props) {
     super(props);
+
+    this.tabsOnSelect = this.tabsOnSelect.bind(this);
 
     // Get transforms and configurations from window object
     const dataexamples = transforms;
@@ -34,7 +35,7 @@ class ExerciserBootstrap extends React.Component {
         newObj.id = value.id;
         newObj.name = `${value.name}`;
         newObj.type = value.jsondata;
-        newObj.jsonata = `${value.transform}`;
+        newObj.transform = `${value.transform}`;
         newObj.jsonatabinding = {};
         return newObj;
       })
@@ -48,7 +49,7 @@ class ExerciserBootstrap extends React.Component {
         id: 'empty',
         name: 'Empty',
         type: 'empty',
-        jsonata: `$.{}`,
+        transform: `$.{}`,
         jsonatabinding: {},
       },
     };
@@ -58,27 +59,37 @@ class ExerciserBootstrap extends React.Component {
       ...this.sources,
     };
 
+    this.sampledata = sampledata;
+
     this.data = {
       json: JSON.stringify({}, null, 2),
-      jsonata: `$.{}`,
+      transform: `$.{}`,
       jsonatabinding: JSON.stringify({}, null, 2),
       result: null,
     };
   }
 
   componentDidMount() {
+    this.loadJSONata();
     this.eval();
+  }
+
+  tabsOnSelect(eventKey, event) {
+    this.jsonEditor.layout();
+    this.jsonataEditor.layout();
+    this.jsonatabindingEditor.layout();
+    this.resultsEditor.layout();
   }
 
   editorOverwrite(editor, value) {
     if (editor) {
-      editor.updateNoUndo(value);
+      editor.setValue(value);
     }
   }
 
   allEditorsOverwrite() {
     this.editorOverwrite(this.jsonEditor, this.data.json);
-    this.editorOverwrite(this.jsonataEditor, this.data.jsonata);
+    this.editorOverwrite(this.jsonataEditor, this.data.transform);
     this.editorOverwrite(this.jsonatabindingEditor, this.data.jsonatabinding);
     this.editorOverwrite(this.resultsEditor, this.data.results);
   }
@@ -90,7 +101,7 @@ class ExerciserBootstrap extends React.Component {
 
   jsonataEditorDidMount(editor, monaco) {
     this.jsonataEditor = editor;
-    this.editorOverwrite(this.jsonataEditor, this.data.jsonata);
+    this.editorOverwrite(this.jsonataEditor, this.data.transform);
   }
 
   jsonatabindingEditorDidMount(editor, monaco) {
@@ -110,25 +121,40 @@ class ExerciserBootstrap extends React.Component {
     this.clearMarkers();
   }
 
-  onChangeExpression(newValue, e) {
-    this.data.jsonata = newValue;
+  onChangeTransform(newValue, e) {
+    this.data.transform = newValue;
     clearTimeout(this.timer);
     this.timer = setTimeout(this.eval.bind(this), 750);
     this.clearMarkers();
   }
 
-  onChangejsonatabinding(newValue, e) {
+  onChangeBindingconfig(newValue, e) {
     this.data.jsonatabinding = newValue;
     clearTimeout(this.timer);
     this.timer = setTimeout(this.eval.bind(this), 750);
     this.clearMarkers();
   }
 
+  loadJSONata() {
+    const head = document.getElementsByTagName('head')[0];
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://cdn.jsdelivr.net/npm/jsonata/jsonata.min.js';
+
+    const scriptextended = document.createElement('script');
+    scriptextended.type = 'text/javascript';
+    scriptextended.src =
+      'https://cdn.jsdelivr.net/npm/jsonata-extended/dist/jsonata-extended.min.js';
+    this.local = false;
+    head.appendChild(script);
+    head.appendChild(scriptextended);
+  }
+
   changeData(eventkey, event) {
     const selected = this.sources[eventkey];
     this.data = {
-      json: JSON.stringify(sampledata[selected.type], null, 2),
-      jsonata: selected.jsonata,
+      json: JSON.stringify(this.sampledata[selected.type], null, 2),
+      transform: selected.transform,
       jsonatabinding: JSON.stringify(selected.jsonatabinding || {}, null, 2),
     };
     this.allEditorsOverwrite();
@@ -156,16 +182,15 @@ class ExerciserBootstrap extends React.Component {
     try {
       jsonatabinding = JSON.parse(this.data.jsonatabinding);
     } catch (err) {
-      this.data.results = `ERROR IN BASE CONFIGURATION JSON DATA: ${err.message}`;
+      this.data.results = `ERROR IN BINDING JSON DATA: ${err.message}`;
       this.jsonatabindingEditor.addErrorDecorationFromErr(err);
       return;
     }
 
     binding = _.merge({}, jsonatabinding);
-    // binding = {};
 
     try {
-      if (this.data.jsonata !== '') {
+      if (this.data.transform !== '') {
         jsonataResult = this.evalJsonata(input, binding);
         this.data.results = jsonataResult;
       }
@@ -183,7 +208,7 @@ class ExerciserBootstrap extends React.Component {
   }
 
   evalJsonata(input, binding) {
-    const expr = window.jsonataExtended(this.data.jsonata);
+    const expr = window.jsonataExtended(this.data.transform);
 
     expr.assign('trace', function (arg) {
       console.log(arg);
@@ -193,7 +218,9 @@ class ExerciserBootstrap extends React.Component {
       this.timeboxExpression(expr, 3000, 750);
     }
 
-    let pathresult = expr.evaluate(input, binding);
+    let pathresult = {};
+    pathresult = expr.evaluate(input, binding);
+
     if (typeof pathresult === 'undefined') {
       pathresult = '** no match **';
     } else {
@@ -280,28 +307,30 @@ class ExerciserBootstrap extends React.Component {
         />
         <Row>
           <Col>
-            <Tabs defaultActiveKey="transform" transition={false} id="transform-config">
+            <Tabs
+              defaultActiveKey="transform"
+              transition={false}
+              id="transform-config"
+              onSelect={this.tabsOnSelect}
+            >
               <Tab eventKey="transform" title="Transform" className="border">
-                <EnhancedMonacoEditorWithNav
+                <JSONATAEditorWithNav
                   language="jsonata"
                   theme="jsonataTheme"
                   options={options}
-                  onChange={this.onChangeExpression.bind(this)}
+                  onChange={this.onChangeTransform.bind(this)}
                   editorDidMount={this.jsonataEditorDidMount.bind(this)}
                   label="Transform"
                   formatEnabled={false}
                 />
               </Tab>
-              <Tab eventKey="jsonatabinding" title="JSONata Binding" className="border">
-                <EnhancedMonacoEditorWithNav
+              <Tab eventKey="jsonatabinding" title="Binding" className="border">
+                <JSONEditorWithNav
                   language="json"
-                  theme="jsonataTheme"
                   options={options}
-                  onChange={this.onChangejsonatabinding.bind(this)}
+                  onChange={this.onChangeBindingconfig.bind(this)}
                   editorDidMount={this.jsonatabindingEditorDidMount.bind(this)}
-                  label="JSONata Binding"
-                  moreinfo="https://docs.jsonata.org/embedding-extending#expressionevaluateinput-bindings-callback"
-                  moreinfolabel="More info on binding"
+                  label="Binding"
                 />
               </Tab>
             </Tabs>
@@ -311,9 +340,8 @@ class ExerciserBootstrap extends React.Component {
           <Col>
             <Tabs defaultActiveKey="results" transition={false} id="transform-data">
               <Tab eventKey="source" title="Source Data" className="border">
-                <EnhancedMonacoEditorWithNav
+                <JSONEditorWithNav
                   language="json"
-                  theme="jsonataTheme"
                   options={options}
                   onChange={this.onChangeData.bind(this)}
                   editorDidMount={this.jsonEditorDidMount.bind(this)}
@@ -321,9 +349,8 @@ class ExerciserBootstrap extends React.Component {
                 />
               </Tab>
               <Tab eventKey="results" title="Results" className="border">
-                <EnhancedMonacoEditorWithNav
+                <JSONEditorWithNav
                   language="json"
-                  theme="jsonataTheme"
                   options={resultsoptions}
                   editorDidMount={this.resultsEditorDidMount.bind(this)}
                   label="Results"

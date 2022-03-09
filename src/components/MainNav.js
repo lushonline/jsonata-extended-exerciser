@@ -47,11 +47,13 @@ export default class MainNav extends Component {
 
     return (
       <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
-        <Navbar.Brand>JSONata Extended Excerciser</Navbar.Brand>{' '}
+        <Navbar.Brand className="ms-2" href="#">
+          JSONata Extended Excerciser
+        </Navbar.Brand>{' '}
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">
-          <Nav className="mr-auto">{this.createSourceItems()}</Nav>
-          <Nav>
+          <Nav className="me-auto">{this.createSourceItems()}</Nav>
+          <Nav className="justify-content-end">
             <Nav.Item>
               <OverlayTrigger
                 placement="bottom"

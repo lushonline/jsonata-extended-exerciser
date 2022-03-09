@@ -1,4 +1,4 @@
-export default {
+const transforms = {
   transforms: [
     {
       id: 'a248b600-8351-4bf4-9445-dbc716b1374d',
@@ -36,3 +36,5 @@ export default {
     },
   ],
 };
+
+export default transforms;

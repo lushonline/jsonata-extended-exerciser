@@ -1,10 +1,10 @@
-import React, { Component } from 'react';
+import React from 'react';
 import ExerciserBootstrap from './ExerciserBootstrap';
 
-class App extends Component {
-  render() {
-    return <ExerciserBootstrap />;
-  }
+function App() {
+  const queryParams = new URLSearchParams(window.location.search);
+
+  return <ExerciserBootstrap showall={queryParams.get('showall') === 'true'} />;
 }
 
 export default App;

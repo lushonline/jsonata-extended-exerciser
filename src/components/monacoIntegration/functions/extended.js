@@ -1,1 +1,3 @@
-export default [];
+const fns = [];
+
+export default fns;

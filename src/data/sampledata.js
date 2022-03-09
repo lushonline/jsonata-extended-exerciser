@@ -1,4 +1,4 @@
-export default {
+const sampledata = {
   invoice: {
     Account: {
       'Account Name': 'Firefly',
@@ -309,3 +309,5 @@ export default {
   },
   empty: {},
 };
+
+export default sampledata;

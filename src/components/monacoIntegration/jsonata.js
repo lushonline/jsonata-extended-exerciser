@@ -2,7 +2,7 @@
 import monarchDefinition from './jsonata.monarch';
 import { getSuggestions, getHovers } from './functions/custom';
 
-export default function (monaco) {
+const jsonataIntegration = (monaco) => {
   monaco.languages.register({
     id: 'jsonata',
   });
@@ -32,6 +32,9 @@ export default function (monaco) {
     },
     insertSpaces: true,
     tabSize: 2,
+    folding: {
+      markers: { start: /[\\{\\(]\s*$/, end: /^\s*[\\}\\)]/ },
+    },
   });
 
   // Define a new theme that contains only rules that match this language
@@ -44,6 +47,7 @@ export default function (monaco) {
       { token: 'jsonata-variable', foreground: 'ff4000' },
       { token: 'jsonata-names', foreground: '0000c0' },
     ],
+    colors: {},
   });
 
   // Register a completion item provider for the new language
@@ -83,4 +87,6 @@ export default function (monaco) {
       return null;
     },
   });
-}
+};
+
+export default jsonataIntegration;
