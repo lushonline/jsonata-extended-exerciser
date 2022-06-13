@@ -188,7 +188,18 @@ class JSONEditor extends React.Component {
         },
       ]);
     }
+    this.format();
   };
+
+  /**
+   * Run the Monaco Editor formatDocument Action
+   *
+   * @return {}
+   * @memberof JSONATAEditor
+   */
+  format() {
+    this.getEditor().getAction('editor.action.formatDocument').run();
+  }
 
   /**
    * Instructs the editor to remeasure its container. This method should

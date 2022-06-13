@@ -41,7 +41,7 @@ export default class JSONEditorWithNav extends Component {
       info: props.info || null,
     };
 
-    this.editor = null;
+    this.jsonEditor = null;
   }
 
   /**
@@ -51,7 +51,7 @@ export default class JSONEditorWithNav extends Component {
    * @memberof EnhancedEditor
    */
   getModel() {
-    return this.editor.getModel();
+    return this.jsonEditor.getModel();
   }
 
   /**
@@ -61,7 +61,7 @@ export default class JSONEditorWithNav extends Component {
    * @memberof EnhancedEditor
    */
   getValue() {
-    return this.editor.getValue();
+    return this.jsonEditor.getValue();
   }
 
   /**
@@ -71,7 +71,7 @@ export default class JSONEditorWithNav extends Component {
    * @memberof EnhancedEditor
    */
   setValue(value) {
-    return this.editor.setValue(value);
+    return this.jsonEditor.setValue(value);
   }
 
   /**
@@ -91,7 +91,7 @@ export default class JSONEditorWithNav extends Component {
    *
    */
   clearDecorations() {
-    return this.editor.clearDecorations();
+    return this.jsonEditor.clearDecorations();
   }
 
   onResize = (width, height) => {
@@ -99,11 +99,11 @@ export default class JSONEditorWithNav extends Component {
       width,
       height,
     });
-    this.editor.resize(width, height);
+    this.jsonEditor.resize(width, height);
   };
 
   layout() {
-    this.editor.layout();
+    this.jsonEditor.layout();
   }
 
   /**
@@ -113,13 +113,11 @@ export default class JSONEditorWithNav extends Component {
    * @param {integer} end
    */
   addErrorDecoration(start, end) {
-    this.editor.addErrorDecoration(start, end);
+    this.jsonEditor.addErrorDecoration(start, end);
   }
 
   _onFormatClick(eventKey, event) {
-    const value = this.getValue();
-    const formatted = JSON.stringify(JSON.parse(value), null, 2);
-    this.setValue(formatted);
+    this.jsonEditor.format();
   }
 
   _onDownloadClick(eventKey, event) {
@@ -153,7 +151,7 @@ export default class JSONEditorWithNav extends Component {
    * @param {*} err
    */
   addErrorDecorationFromErr(err) {
-    this.editor.addErrorDecorationFromErr(err);
+    this.jsonEditor.addErrorDecorationFromErr(err);
   }
 
   /**
@@ -161,7 +159,7 @@ export default class JSONEditorWithNav extends Component {
    *
    */
   componentWillUnmount() {
-    this.editor = null;
+    this.jsonEditor = null;
   }
 
   /**
@@ -169,7 +167,7 @@ export default class JSONEditorWithNav extends Component {
    *
    */
   editorDidMount(editor, monaco) {
-    this.editor = editor;
+    this.jsonEditor = editor;
     // Bubble up the event
     if (this.props.editorDidMount) {
       this.props.editorDidMount(this, monaco);

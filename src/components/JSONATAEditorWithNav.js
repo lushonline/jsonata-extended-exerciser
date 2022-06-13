@@ -17,6 +17,7 @@ export default class JSONATAEditorWithNav extends Component {
   constructor(props) {
     super(props);
     this.editorDidMount = this.editorDidMount.bind(this);
+    this._onFormatClick = this._onFormatClick.bind(this);
     this._onDownloadClick = this._onDownloadClick.bind(this);
     this.notificationElement = React.createRef();
 
@@ -27,7 +28,7 @@ export default class JSONATAEditorWithNav extends Component {
       info: props.info || null,
     };
 
-    this.editor = null;
+    this.jsonataEditor = null;
   }
 
   /**
@@ -37,7 +38,7 @@ export default class JSONATAEditorWithNav extends Component {
    * @memberof EnhancedEditor
    */
   getModel() {
-    return this.editor.getModel();
+    return this.jsonataEditor.getModel();
   }
 
   /**
@@ -47,7 +48,7 @@ export default class JSONATAEditorWithNav extends Component {
    * @memberof EnhancedEditor
    */
   getValue() {
-    return this.editor.getValue();
+    return this.jsonataEditor.getValue();
   }
 
   /**
@@ -57,7 +58,7 @@ export default class JSONATAEditorWithNav extends Component {
    * @memberof EnhancedEditor
    */
   setValue(value) {
-    return this.editor.setValue(value);
+    return this.jsonataEditor.setValue(value);
   }
 
   /**
@@ -77,7 +78,7 @@ export default class JSONATAEditorWithNav extends Component {
    *
    */
   clearDecorations() {
-    return this.editor.clearDecorations();
+    return this.jsonataEditor.clearDecorations();
   }
 
   onResize = (width, height) => {
@@ -85,11 +86,11 @@ export default class JSONATAEditorWithNav extends Component {
       width,
       height,
     });
-    this.editor.resize(width, height);
+    this.jsonataEditor.resize(width, height);
   };
 
   layout() {
-    this.editor.layout();
+    this.jsonataEditor.layout();
   }
 
   /**
@@ -99,7 +100,11 @@ export default class JSONATAEditorWithNav extends Component {
    * @param {integer} end
    */
   addErrorDecoration(start, end) {
-    this.editor.addErrorDecoration(start, end);
+    this.jsonataEditor.addErrorDecoration(start, end);
+  }
+
+  _onFormatClick(eventKey, event) {
+    this.jsonataEditor.format();
   }
 
   _onDownloadClick(eventKey, event) {
@@ -113,7 +118,7 @@ export default class JSONATAEditorWithNav extends Component {
    * @param {*} err
    */
   addErrorDecorationFromErr(err) {
-    this.editor.addErrorDecorationFromErr(err);
+    this.jsonataEditor.addErrorDecorationFromErr(err);
   }
 
   /**
@@ -121,7 +126,7 @@ export default class JSONATAEditorWithNav extends Component {
    *
    */
   componentWillUnmount() {
-    this.editor = null;
+    this.jsonataEditor = null;
   }
 
   /**
@@ -129,7 +134,7 @@ export default class JSONATAEditorWithNav extends Component {
    *
    */
   editorDidMount(editor, monaco) {
-    this.editor = editor;
+    this.jsonataEditor = editor;
     // Bubble up the event
     if (this.props.editorDidMount) {
       this.props.editorDidMount(this, monaco);
@@ -172,6 +177,12 @@ export default class JSONATAEditorWithNav extends Component {
             label={label}
             info={this.state.info}
             navLinks={[
+              {
+                enabled: formatEnabled,
+                label: 'Format',
+                tooltip: 'Format the editor contents',
+                onClick: this._onFormatClick,
+              },
               {
                 enabled: downloadEnabled,
                 label: 'Download',
@@ -216,6 +227,7 @@ JSONATAEditorWithNav.propTypes = {
 JSONATAEditorWithNav.defaultProps = {
   className: 'resizable-editor-withnav',
   downloadEnabled: true,
+  formatEnabled: true,
   label: 'JSONata Editor with Nav',
   info: null,
   id: uuidv4(),

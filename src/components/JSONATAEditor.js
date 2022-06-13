@@ -13,8 +13,8 @@ class JSONATAEditor extends React.Component {
     this.state = {
       height: this.props.height || '100%',
       width: this.props.width || '100%',
-      filename: `${accessSafe(() => this.props.label, 'filename')}.json`.toLowerCase(),
-      language: 'json',
+      filename: `${accessSafe(() => this.props.label, 'filename')}.jsonata`.toLowerCase(),
+      language: 'jsonata',
     };
     this.editorDidMount = this.editorDidMount.bind(this);
     this.editorWillMount = this.editorWillMount.bind(this);
@@ -179,6 +179,16 @@ class JSONATAEditor extends React.Component {
   }
 
   /**
+   * Run the Monaco Editor formatDocument Action
+   *
+   * @return {}
+   * @memberof JSONATAEditor
+   */
+  format() {
+    this.getEditor().getAction('editor.action.formatDocument').run();
+  }
+
+  /**
    * Set the Monaco Editor Model values
    *
    * @param {string} value
@@ -199,6 +209,7 @@ class JSONATAEditor extends React.Component {
         },
       ]);
     }
+    this.format();
   };
 
   /**

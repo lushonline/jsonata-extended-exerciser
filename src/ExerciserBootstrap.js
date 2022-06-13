@@ -282,7 +282,7 @@ class ExerciserBootstrap extends React.Component {
     const options = {
       minimap: { enabled: false },
       lineNumbers: 'off',
-      contextmenu: false,
+      contextmenu: true,
       automaticLayout: true,
       scrollBeyondLastLine: false,
       extraEditorClassName: 'editor-pane',
@@ -292,7 +292,7 @@ class ExerciserBootstrap extends React.Component {
       lineNumbers: 'off',
       minimap: { enabled: false },
       automaticLayout: true,
-      contextmenu: false,
+      contextmenu: true,
       scrollBeyondLastLine: false,
       readOnly: true,
       extraEditorClassName: 'result-pane',
@@ -321,7 +321,7 @@ class ExerciserBootstrap extends React.Component {
                   onChange={this.onChangeTransform.bind(this)}
                   editorDidMount={this.jsonataEditorDidMount.bind(this)}
                   label="Transform"
-                  formatEnabled={false}
+                  formatEnabled={true}
                 />
               </Tab>
               <Tab eventKey="jsonatabinding" title="Binding" className="border">
