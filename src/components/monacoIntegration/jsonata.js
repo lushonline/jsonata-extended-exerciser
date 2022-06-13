@@ -1,6 +1,7 @@
 /* eslint-disable no-template-curly-in-string */
 import monarchDefinition from './jsonata.monarch';
 import { getSuggestions, getHovers } from './functions/custom';
+import jsonataFormatProvider from './jsonataFormatProvider';
 
 const jsonataIntegration = (monaco) => {
   monaco.languages.register({
@@ -87,6 +88,11 @@ const jsonataIntegration = (monaco) => {
       return null;
     },
   });
+
+  monaco.languages.registerDocumentFormattingEditProvider(
+    'jsonata',
+    jsonataFormatProvider({ printWidth: 100, tabWidth: 4, useTabs: false })
+  );
 };
 
 export default jsonataIntegration;
