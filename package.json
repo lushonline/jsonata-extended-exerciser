@@ -1,7 +1,7 @@
 {
   "name": "jsonata-extended-exerciser",
   "description": "This allows you to test JSONata expressions against a JSON input. It supports the extended functions from https://www.npmjs.com/package/jsonata-extended",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "author": {
     "name": "lushonline",
