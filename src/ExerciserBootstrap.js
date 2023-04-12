@@ -163,7 +163,7 @@ class ExerciserBootstrap extends React.Component {
     this.clearMarkers();
   }
 
-  eval() {
+  async eval() {
     let input, jsonataResult, jsonatabinding, binding;
 
     if (typeof window.jsonataExtended === 'undefined') {
@@ -192,6 +192,9 @@ class ExerciserBootstrap extends React.Component {
     try {
       if (this.data.transform !== '') {
         jsonataResult = this.evalJsonata(input, binding);
+        if (this.isPromise(jsonataResult)) {
+          jsonataResult = await jsonataResult;
+        }
         this.data.results = jsonataResult;
       }
     } catch (err) {
@@ -207,7 +210,16 @@ class ExerciserBootstrap extends React.Component {
     this.jsonEditor.clearDecorations();
   }
 
-  evalJsonata(input, binding) {
+  isPromise(value) {
+    return !!(
+      value &&
+      value.then &&
+      typeof value.then === 'function' &&
+      value?.constructor?.name === 'Promise'
+    );
+  }
+
+  async evalJsonata(input, binding) {
     const expr = window.jsonataExtended(this.data.transform);
 
     expr.assign('trace', function (arg) {
@@ -220,7 +232,9 @@ class ExerciserBootstrap extends React.Component {
 
     let pathresult = {};
     pathresult = expr.evaluate(input, binding);
-
+    if (this.isPromise(pathresult)) {
+      pathresult = await pathresult;
+    }
     if (typeof pathresult === 'undefined') {
       pathresult = '** no match **';
     } else {
