@@ -3,11 +3,14 @@
   "description": "This allows you to test JSONata expressions against a JSON input. It supports the extended functions from https://www.npmjs.com/package/jsonata-extended",
   "version": "1.2.0",
   "private": true,
-  "author": "Martin Holden &lt;martin.holden@skillsoft.com&gt;",
+  "author": {
+    "name": "lushonline",
+    "email": "56685070+lushonline@users.noreply.github.com"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/martinholden-skillsoft/jsonata-extended-exerciser.git"
+    "url": "git+ssh://git@github.com/lushonline/jsonata-extended-exerciser.git"
   },
   "homepage": "./",
   "dependencies": {
