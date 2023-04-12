@@ -41,4 +41,4 @@ You will be able to access the tool at [http://localhost:8080](http://localhost:
 
 ## License
 
-MIT © Martin Holden
+MIT © Lushonline
